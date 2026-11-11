@@ -1,0 +1,13 @@
+21:33:07 algo=minhash  status=live     stage=shuffle    pct= 39.7 docs=994816/1000000 thr=21089/s cur=签名计算:99.5 cpu=95%
+21:33:10 algo=minhash  status=live     stage=shuffle    pct= 39.7 docs=994816/1000000 thr=19826/s cur=签名计算:99.5 cpu=95%
+21:33:13 algo=minhash  status=live     stage=compare    pct= 39.8 docs=994816/1000000 thr=18705/s cur=签名计算:99.5 cpu=55%
+21:33:16 algo=minhash  status=live     stage=compare    pct= 39.9 docs=994816/1000000 thr=17395/s cur=签名计算:99.5 cpu=55%
+21:33:20 algo=minhash  status=live     stage=compare    pct= 40.1 docs=994816/1000000 thr=16526/s cur=签名计算:99.5 cpu=23%
+21:33:23 algo=minhash  status=live     stage=compare    pct= 40.2 docs=994816/1000000 thr=15740/s cur=签名计算:99.5 cpu=23%
+21:33:26 algo=minhash  status=live     stage=compare    pct= 40.3 docs=994816/1000000 thr=14802/s cur=签名计算:99.5 cpu=23%
+21:33:30 algo=minhash  status=live     stage=compare    pct= 40.5 docs=994816/1000000 thr=13969/s cur=签名计算:99.5 cpu=23%
+21:33:34 algo=minhash  status=live     stage=compare    pct= 40.6 docs=994816/1000000 thr=13404/s cur=签名计算:99.5 cpu=23%
+21:33:37 algo=minhash  status=live     stage=compare    pct= 40.8 docs=994816/1000000 thr=12882/s cur=签名计算:99.5 cpu=23%
+21:33:40 algo=minhash  status=live     stage=compare    pct= 40.9 docs=994816/1000000 thr=12399/s cur=签名计算:99.5 cpu=23%
+21:33:43 algo=minhash  status=live     stage=compare    pct= 41.0 docs=994816/1000000 thr=11951/s cur=签名计算:99.5 cpu=23%
+21:33:47 algo=minhash  status=live     stage=compare    pct= 41.1 docs=994816/1000000 thr=11402/s cur=签名计算:99.5 cpu=23%

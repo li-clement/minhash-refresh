@@ -1,0 +1,17 @@
+# 10K minhash 运行期间 /api/state 实时抓取（每 1.2s 一次，node1:8501）
+# 命令：curl -s 127.0.0.1:8501/api/state | jq '.algorithm, .experiment.stage, .experiment.percent, .experiment.docs_done'
+16:27:34 minhash stage= signature pct= 0.0  docs= 0 / 10002
+16:27:35 minhash stage= shuffle   pct= 7.2  docs= 1636 / 10002
+16:27:36 minhash stage= shuffle   pct= 22.6 docs= 5264 / 10002
+16:27:38 minhash stage= shuffle   pct= 25.6 docs= 5764 / 10002
+16:27:40 minhash stage= compare   pct= 27.7 docs= 5764 / 10002
+16:27:42 minhash stage= compare   pct= 35.0 docs= 5764 / 10002
+16:27:46 minhash stage= compare   pct= 50.9 docs= 5764 / 10002
+16:27:49 minhash stage= compare   pct= 58.9 docs= 5764 / 10002
+16:27:51 minhash stage= compare   pct= 66.4 docs= 5764 / 10002
+16:27:52 minhash stage= done      pct= 100.0 docs= 10002 / 10002
+
+# 阶段明细（同一时刻的 /api/state.experiment.stages）：
+# [('signature', ...), ('shuffle', ...), ('compare', 120024 total), ('verify', 0, None), ('resolve', 1, 1)]
+# 参数条（/api/state.params）：bands=12 · rows=10 · t=0.8 · shingle=3 · verify=0
+# 历史面板（/api/runs?refresh=1）：19 行 / 14 run，algo_summary 里 minhash 与 simhash 并排

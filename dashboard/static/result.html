@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>去重结果 · slim</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#161a21; --card2:#1b202a; --line:#252b36;
+    --fg:#e8edf5; --dim:#8b95a7; --acc:#2fd6c3; --acc2:#7b4fa3;
+    --ok:#2fbf7f; --warn:#e0a63a; --bad:#e0574a; --blue:#4a9be0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:14px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",sans-serif}
+  a{color:var(--acc);text-decoration:none}
+  header{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid var(--line);
+         background:linear-gradient(180deg,#151a22,#0e1014);position:sticky;top:0;z-index:9}
+  header h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.3px}
+  .pill{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--dim)}
+  .pill b{color:var(--fg);font-weight:600}
+  .btn{margin-left:auto;border:1px solid var(--line);background:var(--card2);color:var(--fg);
+       padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer}
+  .btn:hover{border-color:var(--acc);color:var(--acc)}
+  main{padding:18px 22px 60px;max-width:1560px;margin:0 auto}
+  .grid{display:grid;gap:14px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .card .k{font-size:12px;color:var(--dim);margin-bottom:6px;letter-spacing:.4px}
+  .card .v{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums}
+  .card .s{font-size:12px;color:var(--dim);margin-top:4px}
+  h2{font-size:14px;font-weight:600;margin:22px 0 10px;color:var(--fg);letter-spacing:.4px}
+  h2 span{color:var(--dim);font-weight:400;margin-left:8px;font-size:12px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:500;font-size:12px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:ui-monospace,Menlo,monospace}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)} .dim{color:var(--dim)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:var(--card2);border-radius:999px;
+        padding:4px 10px;font-size:12px;color:var(--dim)}
+  .chip b{color:var(--fg)}
+  .chart{width:100%;height:150px;display:block}
+  .cmp{border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;background:var(--card)}
+  .cmp .hd{display:flex;gap:12px;align-items:center;padding:9px 14px;background:var(--card2);
+           border-bottom:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .cmp .hd b{color:var(--fg)}
+  .cmp .bd{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .col{padding:12px 14px;border-right:1px solid var(--line)}
+  .col:last-child{border-right:0}
+  .col .t{font-size:12px;color:var(--dim);margin-bottom:8px}
+  .txt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.75;
+       white-space:pre-wrap;word-break:break-all;max-height:220px;overflow:auto}
+  .same{background:rgba(47,214,195,.10)}
+  .diff{background:rgba(224,87,74,.22);border-radius:3px}
+  .badge{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;margin-left:6px;
+         border:1px solid var(--line)}
+  .b-orig{color:#6fd3ff} .b-exact{color:#9be36f} .b-near{color:#ffd166} .b-border{color:#c792ea} .b-neg{color:#ef7a6d}
+  .note{padding:10px 14px;background:rgba(74,155,224,.08);border:1px solid rgba(74,155,224,.3);
+        border-radius:10px;font-size:12.5px;color:var(--dim);margin-bottom:14px}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--dim);margin-top:6px}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .empty{padding:40px;text-align:center;color:var(--dim)}
+</style>
+</head>
+<body>
+<header>
+  <h1>去重结果</h1>
+  <span class="pill">run <b id="run">—</b></span>
+  <span class="pill" id="params">—</span>
+  <span class="pill" id="job">—</span>
+  <select id="runs" class="btn" style="margin-left:0;max-width:280px"></select>
+  <button class="btn" style="margin-left:8px" onclick="location.href='/'">← 回到监控</button>
+</header>
+
+<main>
+  <div id="empty" class="empty" style="display:none">
+    还没有结果包。跑一次带 <code>--progress-dir /tmp/raytest</code> 的 slim 实验后刷新。
+  </div>
+  <div id="app" style="display:none">
+
+    <div class="grid cards" id="kpis"></div>
+
+    <h2>去重漏斗<span>文档 → 唯一文本 → 保留</span></h2>
+    <div class="card"><svg id="funnel" class="chart" style="height:120px"></svg></div>
+
+    <h2>指标验收<span>与 fat 基线逐项对齐的那几项</span></h2>
+    <div class="card"><table id="gates"></table></div>
+
+    <h2>耗时与体积<span>阶段分解 / 中间态</span></h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div class="card"><svg id="timing" class="chart" style="height:180px"></svg>
+        <div class="legend"><span><i class="sw" style="background:var(--acc)"></i>阶段耗时</span></div></div>
+      <div class="card"><svg id="bytes" class="chart" style="height:180px"></svg>
+        <div class="legend"><span><i class="sw" style="background:var(--bad)"></i>fat 中间态</span>
+          <span><i class="sw" style="background:var(--ok)"></i>slim 中间态</span></div></div>
+    </div>
+
+    <h2>分量大小分布<span>同一连通分量里有几篇</span></h2>
+    <div class="card"><svg id="sizes" class="chart" style="height:170px"></svg></div>
+
+    <h2>候选对的估计 Jaccard<span>被 LSH 放进同一个桶的对</span></h2>
+    <div class="card"><svg id="jacc" class="chart" style="height:170px"></svg></div>
+
+    <h2>文本对照<span>每个分量取「代表 vs 被删」，差异片段标红</span></h2>
+    <div id="samples"></div>
+  </div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const fmt = (n) => (n == null ? "—" : Number(n).toLocaleString("en-US"));
+const pct = (a, b) => (b ? (100 * a / b).toFixed(1) + "%" : "—");
+
+function kpi(k, v, s, cls) {
+  return `<div class="card"><div class="k">${k}</div>
+    <div class="v ${cls || ""}">${v}</div><div class="s">${s || ""}</div></div>`;
+}
+
+function bars(svg, labels, values, opt = {}) {
+  const w = svg.clientWidth || 800, h = svg.clientHeight || 160;
+  const pad = { l: 46, r: 12, t: 12, b: 26 };
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  const max = Math.max(1, ...values);
+  const bw = iw / values.length;
+  const color = opt.color || "var(--acc)";
+  let out = `<line x1="${pad.l}" y1="${pad.t + ih}" x2="${w - pad.r}" y2="${pad.t + ih}" stroke="#2a3140"/>`;
+  const grid = 4;
+  for (let g = 0; g <= grid; g++) {
+    const y = pad.t + ih * g / grid, v = max * (1 - g / grid);
+    out += `<line x1="${pad.l}" y1="${y}" x2="${w - pad.r}" y2="${y}" stroke="#1e2430"/>`;
+    out += `<text x="${pad.l - 8}" y="${y + 4}" fill="#6b7585" font-size="10" text-anchor="end">${abbr(v)}</text>`;
+  }
+  values.forEach((v, i) => {
+    const bh = Math.max(v > 0 ? 2 : 0, ih * v / max);
+    const x = pad.l + i * bw + bw * 0.16, bwid = bw * 0.68;
+    out += `<rect x="${x}" y="${pad.t + ih - bh}" width="${bwid}" height="${bh}" rx="2"
+             fill="${color}" opacity="${opt.opacity || 0.85}"><title>${labels[i]}: ${fmt(v)}</title></rect>`;
+    if (values.length <= 16 || i % Math.ceil(values.length / 14) === 0)
+      out += `<text x="${x + bwid / 2}" y="${h - 8}" fill="#8b95a7" font-size="10" text-anchor="middle">${labels[i]}</text>`;
+    if (v > 0 && values.length <= 16)
+      out += `<text x="${x + bwid / 2}" y="${pad.t + ih - bh - 4}" fill="#c9d3e0" font-size="10"
+               text-anchor="middle">${abbr(v)}</text>`;
+  });
+  svg.innerHTML = out;
+}
+
+function hbars(svg, rows) {
+  const w = svg.clientWidth || 500, h = svg.clientHeight || 180;
+  const pad = { l: 84, r: 56, t: 6, b: 6 };
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  const max = Math.max(1, ...rows.map((r) => r[1]));
+  const bh = ih / rows.length;
+  let out = "";
+  rows.forEach(([name, v], i) => {
+    const y = pad.t + i * bh + bh * 0.15, hh = bh * 0.7;
+    const bwid = Math.max(2, iw * v / max);
+    out += `<text x="${pad.l - 8}" y="${y + hh * 0.75}" fill="#8b95a7" font-size="11" text-anchor="end">${name}</text>`;
+    out += `<rect x="${pad.l}" y="${y}" width="${bwid}" height="${hh}" rx="3" fill="var(--acc)" opacity=".8"><title>${name}: ${v}s</title></rect>`;
+    out += `<text x="${pad.l + bwid + 6}" y="${y + hh * 0.75}" fill="#c9d3e0" font-size="11">${v}s</text>`;
+  });
+  svg.innerHTML = out;
+}
+
+function abbr(v) {
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + "G";
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + "M";
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + "k";
+  return String(Math.round(v * 10) / 10);
+}
+
+/* 粗粒度字符 diff：公共前缀/后缀之外的片段标红 */
+function diffFrag(a, b) {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  let j = 0;
+  while (j < a.length - i && j < b.length - i && a[a.length - 1 - j] === b[b.length - 1 - j]) j++;
+  return { pre: a.slice(0, i), mid: a.slice(i, a.length - j), post: a.slice(a.length - j) };
+}
+
+function renderSample(s) {
+  const rep = s.rep, others = s.dropped || [];
+  const head = `<div class="hd">
+      <b>分量 #${Math.abs(s.component)}</b>
+      <span>${s.size} 篇</span>
+      ${s.split_group ? '<span class="badge" style="color:var(--warn)">漏召回：同组被拆开</span>'
+                      : '<span class="badge" style="color:var(--ok)">已合并</span>'}
+    </div>`;
+  const cols = others.map((o) => {
+    const d = diffFrag(rep.text, o.text);
+    const d2 = diffFrag(o.text, rep.text);
+    const repHtml = `<span class="same">${esc(d.pre)}</span><span class="diff">${esc(d.mid)}</span>${esc(d.post)}`;
+    const othHtml = `<span class="same">${esc(d2.pre)}</span><span class="diff">${esc(d2.mid)}</span>${esc(d2.post)}`;
+    return `<div class="cmp">
+      <div class="hd">
+        <b>${o.same_class ? "同一精确类（去掉空白后完全相同）" : "估计 Jaccard " + o.est}</b>
+        <span>doc ${o.doc_id}<span class="badge b-${o.kind}">${o.kind}</span> · ${o.chars} 字</span>
+      </div>
+      <div class="bd">
+        <div class="col"><div class="t">代表（保留） · doc ${rep.doc_id}<span class="badge b-${rep.kind}">${rep.kind}</span></div>
+          <div class="txt">${repHtml}</div></div>
+        <div class="col"><div class="t">被删 · doc ${o.doc_id}</div>
+          <div class="txt">${othHtml}</div></div>
+      </div></div>`;
+  }).join("");
+  return head ? cols : "";
+}
+
+function esc(t) {
+  return (t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+async function loadRuns() {
+  try {
+    const r = await (await fetch("/api/run_index", { cache: "no-store" })).json();
+    const runs = (r.runs || []).slice().reverse();
+    const sel = $("#runs");
+    sel.innerHTML = runs.map((x) => {
+      const t = new Date((x.ts || 0) * 1000).toLocaleString("zh-CN", { hour12: false });
+      return `<option value="${x.run_id}">${x.run_id} · ${t} · job ${x.ray_job_id || "-"} · kept ${x.kept}</option>`;
+    }).join("");
+    sel.onchange = () => load(sel.value);
+    return runs;
+  } catch (e) { return []; }
+}
+
+async function load(runId) {
+  let d;
+  const url = runId ? "/api/result?run=" + encodeURIComponent(runId) : "/api/result";
+  try { d = await (await fetch(url, { cache: "no-store" })).json(); }
+  catch (e) { showEmpty("结果包读取失败: " + e); return; }
+  if (!d || d.empty) { showEmpty(); return; }
+  $("#app").style.display = "";
+  $("#run").textContent = d.run_id || "—";
+  $("#job").innerHTML = `ray job <b>${d.ray_job_id || "—"}</b> · ${d.age_sec != null ? d.age_sec + "s 前" : ""}
+    <span style="color:var(--dim)">· ${(d.samples || []).length} 条文本样本</span>`;
+  const p = d.params || {};
+  $("#params").innerHTML = `k=<b>${p.k}</b> · ${p.bands}×${p.rows} · t=<b>${p.threshold}</b> · ${p.mode} · scan=<b>${p.scan}</b>`;
+
+  const m = d.metrics || {}, f = d.funnel || {}, b = d.bytes || {}, sec = d.sec || {};
+  const bk = d.bucket || {};
+  $("#kpis").innerHTML = [
+    kpi("输入 / 保留", `${fmt(f.docs)} → ${fmt(f.kept)}`, `删掉 ${fmt(f.dropped)} 篇（${pct(f.dropped, f.docs)}）`),
+    kpi("唯一文本（预聚合后）", fmt(f.unique), `${pct(f.unique, f.docs)} · 去重前先合并精确重复`),
+    kpi("端到端耗时", (sec.total ?? "—") + "s", `签名 ${sec.sign}s · 比较 ${sec.scan}s`),
+    kpi("中间态", mb(b.slim_bytes), `fat 对照 ${gb(b.fat_bytes)} · 瘦身 ${b.ratio}×`),
+    kpi("候选比较", fmt(bk.compared), `${fmt(bk.buckets)} 个桶 · 最大桶 ${fmt(bk.max_bucket)}`),
+    kpi("成对召回（可比口径）", m.pair_recall_edge_canon ?? "—", "类内真值对已扣除，不是 0.61 那个数"),
+  ].join("");
+
+  // 漏斗
+  bars($("#funnel"), ["原始", "唯一文本", "保留", "删除"],
+       [f.docs, f.unique, f.kept, f.dropped], { color: "var(--acc2)" });
+
+  // 验收
+  const gateRows = [
+    ["组件跨组合并 components_merged", m.components_merged, "== 0"],
+    ["整组丢失 groups_missing", m.groups_missing, "== 0"],
+    ["跨组误边 edge_fp_cross_base", m.edge_fp_cross_base, "== 0"],
+    ["负样本误杀 neg_false_drop_rate", m.neg_false_drop_rate, "== 0"],
+    ["灰区被删 border_dropped", m.border_dropped, "与 fat 同值"],
+    ["保留 kept / 删除 dropped", `${fmt(m.kept)} / ${fmt(m.dropped)}`, "与 fat 逐字节相同"],
+  ];
+  $("#gates").innerHTML = `<tr><th>指标</th><th style="text-align:right">值</th><th>判定</th></tr>` +
+    gateRows.map(([k, v, rule]) => {
+      const ok = typeof v === "number" ? v === 0 : true;
+      return `<tr><td>${k}</td><td class="num ${ok ? "ok" : "bad"}">${typeof v === "number" ? fmt(v) : v}</td>
+              <td class="dim">${rule}</td></tr>`;
+    }).join("");
+
+  // 耗时 / 体积
+  const order = ["exact", "sign", "band_rows", "scan", "uf", "eval", "load"];
+  const label = { exact: "精确预聚合", sign: "签名", band_rows: "分带行", scan: "桶内比较",
+                  uf: "并查集", eval: "指标评估", load: "读入" };
+  hbars($("#timing"), order.filter((k) => sec[k] != null).map((k) => [label[k], sec[k]]));
+  bars($("#bytes"), ["fat 中间态", "slim 中间态"],
+       [b.fat_bytes || 0, b.slim_bytes || 0], { color: "var(--ok)" });
+
+  // 分量大小
+  const cs = d.component_sizes || {};
+  const keys = Object.keys(cs).sort((x, y) => +x - +y);
+  bars($("#sizes"), keys.map((k) => (k === "9" ? "9+" : k)), keys.map((k) => cs[k]));
+
+  // Jaccard
+  const j = d.jaccard || {};
+  if ((j.counts || []).length) {
+    bars($("#jacc"), j.bins.map((x) => x.toFixed(2)), j.counts, { color: "var(--blue)" });
+  } else {
+    $("#jacc").outerHTML = '<div class="note">本次 run 没有候选边直方图（--no-eval 或没有边）。</div>';
+  }
+
+  // 文本对照
+  const box = $("#samples");
+  const merged = (d.samples || []).filter((s) => !s.split_group);
+  const missed = (d.samples || []).filter((s) => s.split_group);
+  box.innerHTML =
+    `<div class="note">样本按分量大小分层抽取：先取最大的 ${Math.min(8, merged.length)} 个分量，再随机补若干。
+      红字是两边文本的差异片段；「同一精确类」表示两篇去掉空白后完全一样。</div>` +
+    merged.map(renderSample).join("") +
+    (missed.length ? `<h2>漏召回样例<span>同组文档被拆到不同分量（参考用）</span></h2>` +
+      missed.map(renderSample).join("") : "");
+}
+
+function showEmpty(msg) {
+  $("#empty").style.display = "";
+  if (msg) $("#empty").textContent = msg;
+}
+
+function mb(v) { return v == null ? "—" : v >= 1e9 ? (v / 1e9).toFixed(2) + " GB" : (v / 1e6).toFixed(1) + " MB"; }
+function gb(v) { return v == null ? "—" : (v / 1e9).toFixed(2) + " GB"; }
+
+function main(runId) { return load(runId); }
+window.addEventListener("resize", () => { clearTimeout(window._rz); window._rz = setTimeout(() => main($("#runs").value || ""), 200); });
+(async () => { const runs = await loadRuns(); await load(runs[0] ? runs[0].run_id : ""); })();
+</script>
+</body>
+</html>

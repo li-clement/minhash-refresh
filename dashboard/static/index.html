@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>去重实验 · 任务监控</title>
+<link rel="stylesheet" href="./static/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2338bdf8'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- ============ 顶部状态条 ============ -->
+<header id="statusbar">
+  <div class="brand">
+    <span class="dot" id="conn-dot" title="SSE 连接状态"></span>
+    <span>任务监控</span>
+    <span class="algobadge unknown" id="sb-algo" title="当前算法（progress.json / result.json 的 algorithm）">未知</span>
+    <span class="brand-sub" id="sb-algo-sub">等待实验上报算法</span>
+  </div>
+
+  <div class="stat">
+    <span class="k">run_id</span>
+    <span class="v mono" id="sb-run">—</span>
+  </div>
+
+  <div class="stat">
+    <span class="k">阶段</span>
+    <span class="v" id="sb-stage">—</span>
+  </div>
+
+  <div class="stat">
+    <span class="k">阶段 <b class="mono" id="sb-stage-n">—</b></span>
+    <span class="v"><span class="dots" id="sb-dots"></span></span>
+  </div>
+
+  <div class="stat stat-params">
+    <span class="k">算法参数</span>
+    <span class="v mono" id="sb-params">—</span>
+  </div>
+
+  <div class="stat grow">
+    <span class="k">总进度 <b class="mono" id="sb-prog-text">—</b></span>
+    <div class="bar"><i id="sb-prog-fill" style="width:0%"></i></div>
+  </div>
+
+  <div class="stat">
+    <span class="k">整体吞吐</span>
+    <span class="v mono" id="sb-tput">—</span>
+  </div>
+
+  <div class="stat">
+    <span class="k">数据新鲜度</span>
+    <span class="v"><span class="pill unknown" id="sb-fresh">—</span></span>
+  </div>
+
+  <div class="stat">
+    <span class="k">服务</span>
+    <span class="v"><span class="pill unknown" id="sb-health">—</span></span>
+  </div>
+
+  <div class="stat">
+    <span class="k">Ray 集群</span>
+    <span class="v"><span class="pill unknown" id="sb-ray">—</span></span>
+  </div>
+
+  <div class="stat">
+    <span class="k">去重结果</span>
+    <span class="v"><a class="pill" href="/result" target="_blank" rel="noopener"
+        style="text-decoration:none;cursor:pointer" title="打开本次 run 的去重结果可视化">📊 查看结果 →</a></span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ ① 任务分配 ============ -->
+  <section class="card" id="card-alloc">
+    <div class="cardhead">
+      <h2>任务分配</h2>
+      <span class="sub" id="alloc-sub">等待实验启动</span>
+      <div class="chips" id="stage-filter"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="wtable">
+        <colgroup>
+          <col class="c-w"><col class="c-pid"><col class="c-node"><col class="c-stage">
+          <col class="c-num"><col class="c-num"><col class="c-tput"><col class="c-last"><col class="c-age">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>worker</th><th>pid</th><th>node</th><th>阶段</th>
+            <th class="r">批次</th><th class="r">文档</th><th>吞吐</th>
+            <th class="r">最近批次</th><th class="r">更新</th>
+          </tr>
+        </thead>
+        <tbody id="worker-body">
+          <tr><td colspan="9" class="empty">等待实验启动…</td></tr>
+        </tbody>
+        <tfoot id="worker-foot"></tfoot>
+      </table>
+    </div>
+
+    <div class="matrix-head">
+      <span>批次矩阵</span>
+      <span class="legend-inline">
+        <i class="sq ok"></i>5s 内有进展
+        <i class="sq warn"></i>15s 内
+        <i class="sq idle"></i>疑似空闲
+      </span>
+    </div>
+    <div class="matrix" id="matrix"><div class="empty">等待 worker 上报…</div></div>
+  </section>
+
+  <!-- ============ ② 进展 ============ -->
+  <section class="card" id="card-progress">
+    <div class="cardhead">
+      <h2>进展</h2>
+      <span class="sub" id="prog-sub">—</span>
+    </div>
+
+    <div class="overall">
+      <div class="overall-top">
+        <span class="mono" id="prog-docs">—</span>
+        <span class="mono strong" id="prog-pct">—</span>
+      </div>
+      <div class="bar big"><i id="prog-fill" style="width:0%"></i></div>
+    </div>
+
+    <div class="stages" id="stage-list"><div class="empty">暂无阶段数据</div></div>
+
+    <div class="etas" id="etas"></div>
+
+    <div class="chart-wrap">
+      <canvas id="chart-progress" height="168"></canvas>
+    </div>
+    <div class="legend" id="chart-progress-legend">
+      <span><i class="ln cyan"></i>吞吐 docs/s</span>
+      <span><i class="ln green"></i>近 1 分钟均值</span>
+      <span><i class="ln violet dashed"></i>总进度 %</span>
+      <span class="muted" id="chart-progress-count">—</span>
+    </div>
+  </section>
+
+  <!-- ============ ⑤ 服务器资源（视觉上放在进展右侧） ============ -->
+  <section class="card" id="card-res">
+    <div class="cardhead">
+      <h2>服务器资源</h2>
+      <span class="sub" id="res-sub">—</span>
+    </div>
+
+    <div class="res-grid">
+      <div class="res-item">
+        <div class="res-top"><span class="k">CPU 总</span><span class="v mono" id="res-cpu">—</span></div>
+        <div class="bar"><i id="res-cpu-fill" style="width:0%"></i></div>
+        <div class="cores" id="cores"></div>
+      </div>
+
+      <div class="res-item">
+        <div class="res-top"><span class="k">内存</span><span class="v mono" id="res-mem">—</span></div>
+        <div class="bar"><i id="res-mem-fill" class="blue" style="width:0%"></i></div>
+        <div class="res-note mono" id="res-mem-note">—</div>
+      </div>
+
+      <div class="res-item">
+        <div class="res-top"><span class="k">Load average</span><span class="v mono" id="res-load">—</span></div>
+        <div class="res-note mono" id="res-load-note">1 / 5 / 15 分钟</div>
+      </div>
+
+      <div class="res-item">
+        <div class="res-top"><span class="k">磁盘 /</span><span class="v mono" id="res-disk">—</span></div>
+        <div class="bar"><i id="res-disk-fill" class="amber" style="width:0%"></i></div>
+        <div class="res-note mono" id="res-disk-note">—</div>
+      </div>
+
+      <div class="res-item">
+        <div class="res-top"><span class="k">网络</span><span class="v mono" id="res-net">—</span></div>
+        <div class="res-note mono" id="res-net-note">↓ 0 B/s · ↑ 0 B/s</div>
+      </div>
+
+      <div class="res-item">
+        <div class="res-top"><span class="k">Ray 集群资源</span><span class="v mono" id="res-ray">—</span></div>
+        <div class="bar"><i id="res-ray-fill" class="violet" style="width:0%"></i></div>
+        <div class="res-note mono" id="res-ray-note">—</div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="chart-res" height="150"></canvas>
+    </div>
+    <div class="legend" id="chart-res-legend">
+      <span><i class="ln green"></i>CPU %</span>
+      <span><i class="ln blue"></i>内存 %</span>
+      <span><i class="ln amber dashed"></i>网络 MB/s</span>
+      <span class="muted" id="chart-res-count">—</span>
+    </div>
+  </section>
+
+  <!-- ============ ③ 任务输出 ============ -->
+  <section class="card" id="card-output">
+    <div class="cardhead">
+      <h2>任务输出</h2>
+      <span class="sub" id="out-sub">—</span>
+    </div>
+
+    <div class="funnel" id="funnel"><div class="empty">等待漏斗数据…</div></div>
+
+    <div id="result-block" class="result-block">
+      <div class="empty">尚无 result.json（实验未产出最终报告）</div>
+    </div>
+
+    <div class="out-cols">
+      <div class="log-col">
+        <div class="logbar">
+          <span>实验日志 <span class="muted mono" id="log-meta">—</span></span>
+          <span class="logbar-ctrl">
+            <label><input type="checkbox" id="autoscroll" checked> 自动滚动</label>
+            <label>尾部
+              <select id="loglines">
+                <option value="50">50 行</option>
+                <option value="100">100 行</option>
+                <option value="200" selected>200 行</option>
+              </select>
+            </label>
+            <button type="button" id="logbottom" class="btn">跳到底部</button>
+          </span>
+        </div>
+        <pre class="log" id="log"><span class="muted">等待 experiment.log…</span></pre>
+      </div>
+
+      <div class="ev-col">
+        <div class="logbar"><span>事件流 <span class="muted mono" id="ev-count"></span></span></div>
+        <ul class="events" id="events"><li class="empty">暂无事件</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ④ 历史对比（LanceDB dedup_runs） ============ -->
+  <section class="card" id="card-history">
+    <div class="cardhead">
+      <h2>历史对比</h2>
+      <span class="sub" id="hist-sub">读取 LanceDB dedup_runs…</span>
+      <div class="chips" id="hist-filter"></div>
+    </div>
+
+    <div class="hist-note" id="hist-note"></div>
+
+    <div class="table-wrap hist-wrap">
+      <table class="wtable htable">
+        <thead id="hist-thead">
+          <tr>
+            <th class="sortable" data-sort="run_id">run_id<i class="sort-ind"></i></th>
+            <th class="sortable" data-sort="algo">algo<i class="sort-ind"></i></th>
+            <th class="sortable" data-sort="mode">mode<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="docs">docs<i class="sort-ind"></i></th>
+            <th class="sortable" data-sort="config">参数<i class="sort-ind"></i></th>
+            <th class="sortable" data-sort="ray_job_id" title="Ray job 编码（run_id 的后 8 位就是它）">ray job<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="pair_recall" title="成对召回">pair_recall<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="pair_precision" title="成对精度">pair_precision<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="edge_fp_cross_base" title="跨组误边（必须 0）">跨组误边<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="components_merged" title="合并分量（必须 0）">合并分量<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="groups_missing" title="丢失组（必须 0）">丢失组<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="kept">kept<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="dkept" title="同一 run 的 ray − local">Δkept<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="dedges" title="同一 run 的 ray − local">Δedges<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="seconds">seconds<i class="sort-ind"></i></th>
+            <th class="r sortable" data-sort="docs_per_sec">docs_per_sec<i class="sort-ind"></i></th>
+          </tr>
+        </thead>
+        <tbody id="hist-body">
+          <tr><td colspan="16" class="empty">读取历史 run…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hist-charts">
+      <div class="hist-chart">
+        <div class="chart-head">
+          <span>pair_recall × pair_precision</span>
+          <span class="muted" id="scatter-note" data-default="点 = run×mode · 颜色 = 算法 · 大小 = docs">点 = run×mode · 颜色 = 算法 · 大小 = docs</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-scatter" height="186"></canvas></div>
+        <div class="legend">
+          <span><i class="ln violet"></i>minhash</span>
+          <span><i class="dotfill"></i>ray</span>
+          <span><i class="dotring"></i>local</span>
+        </div>
+      </div>
+
+      <div class="hist-chart">
+        <div class="chart-head">
+          <span>docs_per_sec × docs（规模效应）</span>
+          <span class="muted" id="scale-note" data-default="横轴对数 · 同色连线 = 同算法同 mode">横轴对数 · 同色连线 = 同算法同 mode</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-scale" height="186"></canvas></div>
+        <div class="legend">
+          <span><i class="ln violet"></i>minhash</span>
+          <span><i class="ln dashed"></i>local</span>
+          <span class="muted" id="scale-max">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="pagefoot">
+  <span class="mono" id="foot-meta">—</span>
+  <span class="muted">只读监控 · 不写入实验目录 · 所有 API 走相对路径</span>
+</footer>
+
+<noscript><div class="noscript">本页面需要 JavaScript。</div></noscript>
+<script src="./static/app.js"></script>
+</body>
+</html>

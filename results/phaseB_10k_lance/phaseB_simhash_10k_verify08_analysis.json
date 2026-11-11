@@ -1,0 +1,104 @@
+报告重建自 LanceDB: /tmp/raytest/runs/phaseB_simhash_10k_verify08.json
+{
+  "run_id": "phaseB_simhash_10k_verify08",
+  "per_mode": {
+    "ray": {
+      "kept": 3895,
+      "rows": 10002,
+      "kept_by_kind": {
+        "border": {
+          "kept": 312,
+          "total": 342
+        },
+        "exact": {
+          "kept": 1172,
+          "total": 3372
+        },
+        "near": {
+          "kept": 1080,
+          "total": 2816
+        },
+        "neg": {
+          "kept": 100,
+          "total": 100
+        },
+        "orig": {
+          "kept": 1231,
+          "total": 3372
+        }
+      },
+      "edges": 8842,
+      "merged_components": 0,
+      "merged_top": [],
+      "cross_base_edges": 0,
+      "cross_base_jaccard": null,
+      "cross_base_endpoints": {},
+      "cross_base_hamming": null
+    }
+  },
+  "metrics": {
+    "dup_total": 6188,
+    "dup_kept": 2252,
+    "groups_collapsed_rate": 0.8782,
+    "neg_total": 100,
+    "neg_false_drop_rate": 0.0,
+    "border_total": 342,
+    "border_dropped": 30,
+    "groups_total": 3472,
+    "groups_extra_kept": 423,
+    "groups_missing": 0,
+    "components_merged": 0,
+    "survivor_is_orig_rate": 0.3651,
+    "kept": 3895,
+    "dropped": 6107,
+    "edge_total": 8842,
+    "true_pairs": 9004,
+    "edge_tp": 8724,
+    "edge_fp_cross_base": 0,
+    "edge_fp_border": 118,
+    "pair_recall": 0.9689,
+    "pair_precision": 0.9867,
+    "edges": 8842,
+    "band_hits": 45198,
+    "seconds": 13.39,
+    "docs_per_sec": 747.0,
+    "mode": "ray",
+    "input": "lance",
+    "pools": {
+      "fingerprint": 10,
+      "shuffle": 5,
+      "compare": 5
+    }
+  },
+  "config": {
+    "run_id": "phaseB_simhash_10k_verify08",
+    "mode": "ray",
+    "created_at": "2026-11-10T15:29:15",
+    "docs": "10002",
+    "chars": "3057514",
+    "bits": "128",
+    "band_bits": "16",
+    "hamming": "12",
+    "shingle": "3",
+    "verify": 0.8,
+    "corpus_sha256": "53518f48edf75cd3898aca835ea710bf19ba513ff639d0685f6caf5333638940",
+    "subset_table": "subset_10k",
+    "subset_sha256": "1d7dd46eddd6fb396b51708c05a82df2fb4af2867c66ba9fd3c17662e36fb6b2",
+    "edges": "8842",
+    "band_hits": "45198",
+    "kept": "3895",
+    "dropped": "6107",
+    "pair_recall": 0.9689,
+    "pair_precision": 0.9867,
+    "edge_fp_cross_base": "0",
+    "groups_collapsed_rate": 0.8782,
+    "groups_extra_kept": "423",
+    "groups_missing": "0",
+    "components_merged": "0",
+    "neg_false_drop_rate": 0.0,
+    "border_dropped": "30",
+    "border_total": "342",
+    "seconds": 13.39,
+    "docs_per_sec": 747.0
+  }
+}

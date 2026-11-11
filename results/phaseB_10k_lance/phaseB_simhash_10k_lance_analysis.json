@@ -1,0 +1,251 @@
+报告重建自 LanceDB: /tmp/raytest/runs/phaseB_simhash_10k_lance.json
+{
+  "run_id": "phaseB_simhash_10k_lance",
+  "per_mode": {
+    "local": {
+      "kept": 3872,
+      "rows": 10002,
+      "kept_by_kind": {
+        "border": {
+          "kept": 302,
+          "total": 342
+        },
+        "exact": {
+          "kept": 1166,
+          "total": 3372
+        },
+        "near": {
+          "kept": 1079,
+          "total": 2816
+        },
+        "neg": {
+          "kept": 100,
+          "total": 100
+        },
+        "orig": {
+          "kept": 1225,
+          "total": 3372
+        }
+      },
+      "edges": 8900,
+      "merged_components": 7,
+      "merged_top": [
+        {
+          "rep_id": 696,
+          "size": 9,
+          "bases": [
+            15276,
+            36941,
+            41747
+          ],
+          "kinds": {
+            "orig": 3,
+            "near": 3,
+            "exact": 3
+          }
+        },
+        {
+          "rep_id": 410,
+          "size": 6,
+          "bases": [
+            1421,
+            48307
+          ],
+          "kinds": {
+            "orig": 2,
+            "exact": 2,
+            "near": 2
+          }
+        },
+        {
+          "rep_id": 745,
+          "size": 6,
+          "bases": [
+            19871,
+            44247
+          ],
+          "kinds": {
+            "exact": 2,
+            "orig": 2,
+            "near": 2
+          }
+        }
+      ],
+      "cross_base_edges": 28,
+      "cross_base_jaccard": {
+        "min": 0.286,
+        "p50": 0.365,
+        "max": 0.416,
+        "ge_0.8": 0
+      },
+      "cross_base_endpoints": {
+        "orig-exact": 7,
+        "orig-orig": 6,
+        "exact-exact": 6,
+        "exact-orig": 5,
+        "near-exact": 2,
+        "orig-near": 1
+      },
+      "cross_base_hamming": {
+        "p50": 12,
+        "max": 12
+      }
+    },
+    "ray": {
+      "kept": 3872,
+      "rows": 10002,
+      "kept_by_kind": {
+        "border": {
+          "kept": 302,
+          "total": 342
+        },
+        "exact": {
+          "kept": 1166,
+          "total": 3372
+        },
+        "near": {
+          "kept": 1079,
+          "total": 2816
+        },
+        "neg": {
+          "kept": 100,
+          "total": 100
+        },
+        "orig": {
+          "kept": 1225,
+          "total": 3372
+        }
+      },
+      "edges": 8900,
+      "merged_components": 7,
+      "merged_top": [
+        {
+          "rep_id": 696,
+          "size": 9,
+          "bases": [
+            15276,
+            36941,
+            41747
+          ],
+          "kinds": {
+            "orig": 3,
+            "near": 3,
+            "exact": 3
+          }
+        },
+        {
+          "rep_id": 410,
+          "size": 6,
+          "bases": [
+            1421,
+            48307
+          ],
+          "kinds": {
+            "orig": 2,
+            "exact": 2,
+            "near": 2
+          }
+        },
+        {
+          "rep_id": 745,
+          "size": 6,
+          "bases": [
+            19871,
+            44247
+          ],
+          "kinds": {
+            "exact": 2,
+            "orig": 2,
+            "near": 2
+          }
+        }
+      ],
+      "cross_base_edges": 28,
+      "cross_base_jaccard": {
+        "min": 0.286,
+        "p50": 0.365,
+        "max": 0.416,
+        "ge_0.8": 0
+      },
+      "cross_base_endpoints": {
+        "orig-exact": 7,
+        "orig-orig": 6,
+        "exact-exact": 6,
+        "exact-orig": 5,
+        "near-exact": 2,
+        "orig-near": 1
+      },
+      "cross_base_hamming": {
+        "p50": 12,
+        "max": 12
+      }
+    }
+  },
+  "metrics": {
+    "dup_total": 6188,
+    "dup_kept": 2245,
+    "groups_collapsed_rate": 0.8828,
+    "neg_total": 100,
+    "neg_false_drop_rate": 0.0,
+    "border_total": 342,
+    "border_dropped": 40,
+    "groups_total": 3472,
+    "groups_extra_kept": 407,
+    "groups_missing": 7,
+    "components_merged": 7,
+    "survivor_is_orig_rate": 0.3633,
+    "kept": 3872,
+    "dropped": 6130,
+    "edge_total": 8900,
+    "true_pairs": 9004,
+    "edge_tp": 8724,
+    "edge_fp_cross_base": 28,
+    "edge_fp_border": 148,
+    "pair_recall": 0.9689,
+    "pair_precision": 0.9802,
+    "edges": 8900,
+    "band_hits": 45198,
+    "seconds": 12.55,
+    "docs_per_sec": 797.3,
+    "mode": "ray",
+    "input": "lance",
+    "pools": {
+      "fingerprint": 10,
+      "shuffle": 5,
+      "compare": 5
+    }
+  },
+  "config": {
+    "run_id": "phaseB_simhash_10k_lance",
+    "mode": "ray",
+    "created_at": "2026-11-10T15:25:30",
+    "docs": "10002",
+    "chars": "3057514",
+    "bits": "128",
+    "band_bits": "16",
+    "hamming": "12",
+    "shingle": "3",
+    "verify": 0.0,
+    "corpus_sha256": "53518f48edf75cd3898aca835ea710bf19ba513ff639d0685f6caf5333638940",
+    "subset_table": "subset_10k",
+    "subset_sha256": "1d7dd46eddd6fb396b51708c05a82df2fb4af2867c66ba9fd3c17662e36fb6b2",
+    "edges": 8900.0,
+    "band_hits": 45198.0,
+    "kept": "3872",
+    "dropped": "6130",
+    "pair_recall": 0.9689,
+    "pair_precision": 0.9802,
+    "edge_fp_cross_base": "28",
+    "groups_collapsed_rate": 0.8828,
+    "groups_extra_kept": "407",
+    "groups_missing": "7",
+    "components_merged": "7",
+    "neg_false_drop_rate": 0.0,
+    "border_dropped": "40",
+    "border_total": "342",
+    "seconds": 12.55,
+    "docs_per_sec": 797.3
+  },
+  "ray_vs_local_kept_diff": 0,
+  "ray_vs_local_rep_diff": 0
+}

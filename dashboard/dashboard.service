@@ -1,0 +1,48 @@
+; raytest 任务监控面板 —— systemd **user** 单元模板
+;
+; 这是模板，不要直接 cp 到 ~/.config/systemd/user/：
+; 请用 ./install.sh 安装，它会把 @PROJECT_DIR@ 替换成远端绝对路径
+; （systemd 不展开 `~`，必须是 /home/lee/code/raytest 这样的绝对路径）。
+;
+; 安装后：
+;   systemctl --user is-active  raytest-dashboard
+;   systemctl --user status -l  raytest-dashboard
+;   journalctl --user -u raytest-dashboard -f
+
+[Unit]
+Description=raytest 任务监控面板（FastAPI + uvicorn，0.0.0.0:8501）
+Documentation=file://@PROJECT_DIR@/dashboard/README.md
+After=network-online.target
+Wants=network-online.target
+; 刻意不写 After=ray-head.service：Ray 没起来时面板也必须能打开，用于看"Ray 不可用"
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+WorkingDirectory=@PROJECT_DIR@/dashboard
+
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=RAYTEST_RUN_DIR=/tmp/raytest
+Environment=RAYTEST_RAY_BIN=@PROJECT_DIR@/.venv/bin/ray
+Environment=RAYTEST_HOST=0.0.0.0
+Environment=RAYTEST_PORT=8501
+Environment=RAYTEST_SAMPLE_INTERVAL=2
+Environment=RAYTEST_HISTORY_LEN=300
+Environment=RAYTEST_SSE_INTERVAL=1
+Environment=RAYTEST_IDLE_SEC=15
+
+; NAT 后通过 SSH 隧道访问：ssh -L 8501:127.0.0.1:8501 node1
+ExecStart=@PROJECT_DIR@/.venv/bin/python @PROJECT_DIR@/dashboard/app.py
+Restart=always
+RestartSec=3
+KillSignal=SIGINT
+KillMode=mixed
+TimeoutStopSec=15
+
+; 必须为 false：面板要读 /tmp/raytest（开启 PrivateTmp 会让它看到空的 /tmp）
+PrivateTmp=false
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

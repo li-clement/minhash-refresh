@@ -1,0 +1,111 @@
+{
+  "run_id": "phaseF_fat_minhash_1m",
+  "algorithm": "minhash",
+  "docs": 1000000,
+  "chars": 306595346,
+  "bits": 128,
+  "shingle": 3,
+  "band_bits": 16,
+  "hamming": 3,
+  "seed": 7,
+  "verify": 0.0,
+  "bands": 12,
+  "rows": 10,
+  "threshold": 0.8,
+  "corpus": null,
+  "corpus_sha256": "8a6ad577452c6dd10c9e0336295cb199f9506a89794431b75979c21a435590e6",
+  "lance_input": {
+    "uri": "/tmp/raytest/lance",
+    "subset_table": "subset_1000k",
+    "table_name": "subset_1000k",
+    "kind": "subset",
+    "docs": 1000000,
+    "chars": 306595346,
+    "sha256": "8a6ad577452c6dd10c9e0336295cb199f9506a89794431b75979c21a435590e6",
+    "doc_ids_sha256": "cd31d53b7b42213e46cff34d8132e832bf2573d83ef563bd348d118c9935343c",
+    "subset_limit": 1000000,
+    "by_group": true,
+    "source_table": "corpus_1m",
+    "source_path": "/tmp/raytest/corpus/1m/corpus_1m.jsonl",
+    "created_at": "2026-11-10T17:13:21",
+    "note": "{\"groups\": 366666, \"kinds\": {\"exact\": 333334, \"orig\": 333334, \"near\": 266667, \"neg\": 33332, \"border\": 33333}, \"materialize_sec\": 4.38}",
+    "reused": true
+  },
+  "subset_table": "subset_1000k",
+  "subset_sha256": "cd31d53b7b42213e46cff34d8132e832bf2573d83ef563bd348d118c9935343c",
+  "subset_matches_jsonl": null,
+  "pools": {
+    "signature": 10,
+    "shuffle": 5,
+    "compare": 5
+  },
+  "ray": {
+    "dup_total": 600001,
+    "dup_kept": 208415,
+    "groups_collapsed_rate": 0.9535,
+    "neg_total": 33332,
+    "neg_false_drop_rate": 0.0,
+    "border_total": 33333,
+    "border_dropped": 10758,
+    "groups_total": 366666,
+    "groups_extra_kept": 17042,
+    "groups_missing": 0,
+    "components_merged": 0,
+    "survivor_is_orig_rate": 0.3582,
+    "kept": 383708,
+    "dropped": 616292,
+    "edge_total": 899250,
+    "true_pairs": 866668,
+    "edge_tp": 866592,
+    "edge_fp_cross_base": 0,
+    "edge_fp_border": 32658,
+    "pair_recall": 0.9999,
+    "pair_precision": 0.9637,
+    "edges": 899250,
+    "band_hits": 7838468,
+    "seconds": 1227.6,
+    "docs_per_sec": 814.6,
+    "mode": "ray",
+    "input": "lance",
+    "pools": {
+      "signature": 10,
+      "shuffle": 5,
+      "compare": 5
+    }
+  },
+  "lance_output": {
+    "uri": "/tmp/raytest/lance",
+    "tables": {
+      "dedup_result": "/tmp/raytest/lance/dedup_result.lance",
+      "dedup_edges": "/tmp/raytest/lance/dedup_edges.lance",
+      "dedup_runs": "/tmp/raytest/lance/dedup_runs.lance"
+    },
+    "rows": {
+      "dedup_result": 1000000,
+      "dedup_edges": 899250,
+      "dedup_runs": 1
+    },
+    "write_sec": 1.3
+  },
+  "lance_check": {
+    "rows": 1000000,
+    "modes": [
+      "ray"
+    ],
+    "kept_by_mode": {
+      "ray": 383708
+    },
+    "edges_by_mode": {
+      "ray": 899250
+    },
+    "rows_by_mode": {
+      "ray": 1000000
+    },
+    "count_rows_by_mode": {
+      "ray": 1000000
+    },
+    "kept_rows_by_mode": {
+      "ray": 383708
+    }
+  }
+}

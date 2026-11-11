@@ -1,0 +1,75 @@
+{
+ "table": "subset_1000k",
+ "docs": 1000000,
+ "simhash_8x16": {
+  "label": "simhash 128bit / 8 band × 16bit",
+  "docs": 1000000,
+  "bands": 8,
+  "band_rows": 8000000,
+  "buckets": 175550,
+  "mean_bucket": 45.571,
+  "max_bucket": 26828,
+  "pairs": 5330024719,
+  "pairs_per_doc": 5330.025,
+  "top_sizes": {
+   "1": 26355,
+   "2": 25843,
+   "3": 15897,
+   "4": 10836,
+   "5": 8355
+  },
+  "sec": 2.46,
+  "fp_sec": 26.74,
+  "fp_bytes_per_doc": 16
+ },
+ "minhash_12x10": {
+  "label": "minhash k=128 / 12 band × 10 row",
+  "docs": 1000000,
+  "bands": 12,
+  "band_rows": 12000000,
+  "buckets": 5889424,
+  "mean_bucket": 2.038,
+  "max_bucket": 647,
+  "pairs": 12038746,
+  "pairs_per_doc": 12.039,
+  "top_sizes": {
+   "1": 2017038,
+   "2": 1968898,
+   "3": 1817766,
+   "5": 24522,
+   "4": 22919
+  },
+  "sec": 15.06,
+  "sig_sec": 26.51,
+  "sig_bytes_per_doc": 512
+ },
+ "extrapolate": [
+  {
+   "N": 10000000,
+   "sim_lambda": 152.6,
+   "sim_noise_pairs": 6103515014.6,
+   "min_noise_pairs": 545.7,
+   "sim_shuffle_gb": 2.6,
+   "min_shuffle_gb_fat": 63.4,
+   "min_shuffle_gb_slim": 1.4
+  },
+  {
+   "N": 100000000,
+   "sim_lambda": 1525.9,
+   "sim_noise_pairs": 610351556396.5,
+   "min_noise_pairs": 54569.7,
+   "sim_shuffle_gb": 25.6,
+   "min_shuffle_gb_fat": 633.6,
+   "min_shuffle_gb_slim": 14.4
+  },
+  {
+   "N": 600000000,
+   "sim_lambda": 9155.3,
+   "sim_noise_pairs": 21972656213378.9,
+   "min_noise_pairs": 1964508.6,
+   "sim_shuffle_gb": 153.6,
+   "min_shuffle_gb_fat": 3801.6,
+   "min_shuffle_gb_slim": 86.4
+  }
+ ]
+}
