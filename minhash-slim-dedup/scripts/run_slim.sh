@@ -49,9 +49,9 @@ PIDFILE=$RUN_DIR/$TAG.pid
 # ---- --stop：收掉这个 tag 的远端进程 -------------------------------------
 if [ "$STOP" -eq 1 ]; then
   PID=$(ssh "$HOST" "cat $(printf '%q' "$PIDFILE") 2>/dev/null || true")
-  [ -n "$PID" ] || { echo "没有 $PIDFILE（没在跑，或换过 tag）" >&2; exit 1; }
+  [ -n "$PID" ] || { echo "没有 ${PIDFILE}（没在跑，或换过 tag）" >&2; exit 1; }
   ssh "$HOST" "kill -TERM $PID 2>/dev/null; sleep 1; kill -KILL $PID 2>/dev/null || true; rm -f $(printf '%q' "$PIDFILE")"
-  echo "已停止 $TAG（pid $PID）；Ray 上已启动的 task 会在 driver 退出后自行结束"
+  echo "已停止 ${TAG}（pid ${PID}）；Ray 上已启动的 task 会在 driver 退出后自行结束"
   exit 0
 fi
 
@@ -69,7 +69,7 @@ PY
   ST=${INFO%% *}
   AGE=${INFO##* }
   if [ -n "${ST:-}" ] && [ "$ST" != "done" ] && [ "${AGE:-999}" -lt 120 ]; then
-    echo "⚠️  $RUN_DIR/progress.json 显示 stage=$ST、${AGE}s 前还在更新：有实验正在跑。" >&2
+    echo "⚠️  $RUN_DIR/progress.json 显示 stage=${ST}、${AGE}s 前还在更新：有实验正在跑。" >&2
     echo "    要么等它结束，要么加 --isolated（progress 写到 $RUN_DIR/$TAG-progress，面板默认看不到）。" >&2
     exit 2
   fi
